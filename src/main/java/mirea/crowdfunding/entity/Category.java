@@ -16,4 +16,9 @@ public class Category {
 	String name;
 
 	String slug;
+
+	public Category(String name, String slug){
+		this.name = name;
+		this.slug = slug;
+	}
 }

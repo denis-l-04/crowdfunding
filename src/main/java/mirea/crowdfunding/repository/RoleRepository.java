@@ -10,4 +10,6 @@ import mirea.crowdfunding.entity.Role;
 @Repository
 public interface RoleRepository extends CrudRepository<Role, Integer> {
 	public Optional<Role> findById(Integer id);
+	public Optional<Role> findByName(String name);
+	public long count();
 }

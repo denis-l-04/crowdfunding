@@ -13,6 +13,12 @@ public class RoleService {
     RoleRepository roleRepository;
 	@Bean("ROLE_USER")
 	public Role getUserRole(){
-		return roleRepository.findById(1).get();
+		Role ur = roleRepository.findByName("ROLE_USER").orElse(null);
+		if (ur != null)
+			return ur;
+		ur = new Role();
+		ur.setName("ROLE_USER");
+		roleRepository.save(ur);
+		return ur;
 	}
 }
