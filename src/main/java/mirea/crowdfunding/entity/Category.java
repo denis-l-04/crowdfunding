@@ -17,6 +17,8 @@ public class Category {
 
 	String slug;
 
+	public Category(){}
+	
 	public Category(String name, String slug){
 		this.name = name;
 		this.slug = slug;
