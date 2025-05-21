@@ -27,6 +27,8 @@ public class WebSecurityConfig {
 						.requestMatchers("/api/logout").authenticated()
 						.requestMatchers("/api/me").authenticated()
 						.requestMatchers("/api/fundraisings").permitAll()
+						.requestMatchers("/api/fundraisings/*").permitAll()
+						.requestMatchers("/api/fundraisings/*/comments").authenticated()
 						.requestMatchers("/api/up-balance").authenticated()
 						.requestMatchers("/api/fund/*").authenticated()
 						.anyRequest().denyAll())

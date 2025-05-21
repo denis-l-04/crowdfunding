@@ -3,6 +3,8 @@ package mirea.crowdfunding.controller;
 import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,8 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import mirea.crowdfunding.entity.Comment;
 import mirea.crowdfunding.entity.Fundraising;
 import mirea.crowdfunding.entity.User;
+import mirea.crowdfunding.repository.CommentRepository;
 import mirea.crowdfunding.repository.FundraisingRepository;
 import mirea.crowdfunding.repository.UserRepository;
 import mirea.crowdfunding.service.FundraisingService;
@@ -32,6 +36,8 @@ public class FundController {
 	UserRepository userRepository;
 	@Autowired
 	private ObjectMapper objectMapper;
+	@Autowired
+	private CommentRepository commentRepository;
 
 	@GetMapping("/fundraisings")
 	public @ResponseBody Iterable<Fundraising> getAllFundraisings() {
@@ -57,18 +63,53 @@ public class FundController {
 		}
 	}
 
+	@GetMapping("/fundraisings/{id}")
+	public ResponseEntity<Fundraising> getFundraising(@PathVariable(value = "id") Integer fundraisingId) {
+		var result = fundraisingRepository.findById(fundraisingId).orElse(null);
+		if (result == null)
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		return new ResponseEntity<>(result, HttpStatus.OK);
+	}
+
+	@GetMapping("/fundraisings/{id}/comments")
+	public ResponseEntity<Iterable<Comment>> getComments(@PathVariable(value = "id") Integer fundraisingId) {
+		var fundraising = fundraisingRepository.findById(fundraisingId).orElse(null);
+		if (fundraising == null)
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		return new ResponseEntity<>(fundraising.getComments(), HttpStatus.OK);
+	}
+
+	@PostMapping("/fundraisings/{id}/comments")
+	public ResponseEntity<Comment> leaveComment(
+			@PathVariable(value = "id") Integer fundraisingId,
+			@RequestBody HashMap<String, String> payload) {
+		var fundraising = fundraisingRepository.findById(fundraisingId).orElse(null);
+		if (fundraising == null)
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		if (!payload.containsKey("text"))
+			return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		Comment comment = new Comment();
+		comment.setOwner(user);
+		comment.setText(payload.get("text"));
+		comment.setFundraising(fundraising);
+		commentRepository.save(comment);
+		return new ResponseEntity<>(comment, HttpStatus.CREATED);
+	}
+
 	@Transactional
 	@PostMapping("/fund/{id}")
 	public @ResponseBody String fund(
 			@PathVariable(value = "id") Integer fundraisingId,
 			@RequestBody HashMap<String, Long> payload) {
 		var frOption = fundraisingRepository.findById(fundraisingId);
-		if (frOption.isEmpty()){
+		if (frOption.isEmpty()) {
 			return "Such fundraising doesn't exist.";
 		}
 		Fundraising fundraising = frOption.get();
 		long frMoney = fundraising.getCollectedMoney();
-		
+
 		if (!payload.containsKey("money"))
 			return "Must specify money amount.";
 		long donation = payload.get("money");
@@ -81,7 +122,7 @@ public class FundController {
 			return "Not enough money.";
 		}
 		user.setMoney(balance - donation);
-		fundraising.setCollectedMoney(frMoney+donation);
+		fundraising.setCollectedMoney(frMoney + donation);
 		userRepository.save(user);
 		fundraisingRepository.save(fundraising);
 		return "Success.";

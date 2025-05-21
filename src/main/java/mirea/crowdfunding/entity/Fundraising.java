@@ -45,10 +45,10 @@ public class Fundraising {
     private Integer ownerId;
 
 	@Setter
-    @ManyToOne
+    @ManyToOne()
 	private Category category;
 
 	@JsonIgnore
-	@OneToMany()
+	@OneToMany(mappedBy = "fundraising")
 	private Set<Comment> comments;
 }
