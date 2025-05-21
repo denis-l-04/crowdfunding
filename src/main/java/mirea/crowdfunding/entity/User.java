@@ -13,7 +13,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 public class User implements UserDetails {
 	@Id
@@ -34,50 +38,6 @@ public class User implements UserDetails {
 
 	@ManyToMany(fetch = FetchType.EAGER)
 	private Set<Role> roles;
-
-	public Integer getId() {
-		return id;
-	}
-
-	public void setId(Integer id) {
-		this.id = id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	public Set<Role> getRoles() {
-		return roles;
-	}
-
-	public void setRoles(Set<Role> roles) {
-		this.roles = roles;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public long getMoney() {
-		return this.money;
-	}
-
-	public void setMoney(int money) {
-		this.money = money;
-	}
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {

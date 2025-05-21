@@ -27,6 +27,7 @@ public class WebSecurityConfig {
 						.requestMatchers("/api/logout").authenticated()
 						.requestMatchers("/api/me").authenticated()
 						.requestMatchers("/api/fundraisings").permitAll()
+						.requestMatchers("/api/up-balance").authenticated()
 						.anyRequest().denyAll())
 				.csrf(csrf -> csrf.disable())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
