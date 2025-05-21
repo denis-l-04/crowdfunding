@@ -1,4 +1,6 @@
 package mirea.crowdfunding.controller;
+import java.util.HashMap;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,7 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import mirea.crowdfunding.entity.Category;
 import mirea.crowdfunding.entity.User;
+import mirea.crowdfunding.repository.CategoryRepository;
+import mirea.crowdfunding.repository.UserRepository;
 import mirea.crowdfunding.service.UserService;
 
 @RestController
@@ -18,12 +23,16 @@ import mirea.crowdfunding.service.UserService;
 public class UserController {
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private UserRepository userRepository;
     @Autowired
     private ObjectMapper objectMapper;
+	@Autowired
+	private CategoryRepository categoryRepository;
 
 	@GetMapping("/test")
-	public @ResponseBody Iterable<User> getAllUsers() {
-		return userService.allUsers();
+	public @ResponseBody Category getAllUsers() {
+		return categoryRepository.findById(Integer.valueOf(6)).get();
 	}
 
 	@PostMapping("/register")
@@ -54,5 +63,16 @@ public class UserController {
 		} else {
 			return null;
 		}
+	}
+
+	@PostMapping("/up-balance")
+	public @ResponseBody String upBalance(@RequestBody HashMap<String, Long> payload){
+		User u = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		if (!payload.containsKey("money") || payload.get("money") < 0){
+			return "Invalid input.";
+		}
+		u.setMoney(u.getMoney()+payload.get("money"));
+		userRepository.save(u);
+		return "Success";
 	}
 }
